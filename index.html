@@ -313,6 +313,8 @@ l.parentNode.insertBefore(s, l);
       <div class="actions">
         <button id="copy-btn" class="btn"><i class="fas fa-copy"></i> Copy Text</button>
         <button id="generate-btn" class="btn">New Quote</button>
+        <button id="share-btn" class="btn"><i class="fas fa-share-alt"></i> Share</button>
+
       </div>
       <!-- Hidden textarea for copy functionality -->
       <textarea id="copy-textarea" style="position: absolute; left: -9999px;"></textarea>
@@ -354,6 +356,7 @@ l.parentNode.insertBefore(s, l);
       const quoteAuthorElem = document.getElementById('quote-author');
       const generateBtn = document.getElementById('generate-btn');
       const copyBtn = document.getElementById('copy-btn');
+      const shareBtn=document.getElementById('share-btn');
       const quoteCard = document.getElementById('quote-card');
       const copyTextarea = document.getElementById('copy-textarea');
 
@@ -470,6 +473,40 @@ l.parentNode.insertBefore(s, l);
           copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Text';
         }, 2000);
       });
+      
+      shareBtn.addEventListener('click', () => {
+  if (!currentQuote) {
+    showMessageBox("No Quote", "Please generate a quote first to share.");
+    return;
+  }
+  
+  const shareText = `"${currentQuote.text}" - ${currentQuote.author}
+
+✨ A Quote from PrimeQuotes
+🔗 https://primequotes.netlify.app`;
+
+  if (navigator.share) {
+    navigator.share({
+      title: "Inspiring Quote from PrimeQuotes",
+      text: shareText,
+      url: "https://primequotes.netlify.app"
+    })
+    .then(() => {
+      // After successful share, show the thank you message
+      showMessageBox("Thanks! 🙌", "Thanks for spreading the inspiration! 🚀 You just made someone’s day better.");
+    })
+    .catch((error) => {
+      console.error("Error sharing:", error);
+      showMessageBox("Sharing Failed", "Unable to share at this moment.");
+    });
+  } else {
+    // Fallback for unsupported browsers
+    copyTextarea.value = shareText;
+    copyTextarea.select();
+    document.execCommand('copy');
+    showMessageBox("Share Unavailable", "Sharing is not supported on this device. The quote has been copied instead.");
+  }
+});
 
       // Close message box button click
       messageBoxCloseBtn.addEventListener('click', hideMessageBox);
