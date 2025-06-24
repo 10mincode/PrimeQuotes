@@ -184,8 +184,7 @@
       align-items: center;
       gap: 8px; /* Space between icon and text */
     }
-    #share-btn{
-      background-color:blue;
+
     /* Specific styling for the 'New Quote' button */
     #generate-btn {
       background: linear-gradient(45deg, var(--primary-glow), var(--secondary-glow)); /* Gradient background */
@@ -209,7 +208,14 @@
       color: var(--bg-color); /* Dark text on hover */
       transform: scale(1.05); /* Slightly enlarge */
     }
-
+    #share-btn{
+      background-color:blue;
+      border: 2px solid var(--secondary-glow);
+    }
+    #share-btn:hover{
+      background-color:var(--secondary-glow);
+      border: 2px solid blue;
+    }
     /* Footer text styling */
     footer p {
       margin-top: 10px;
