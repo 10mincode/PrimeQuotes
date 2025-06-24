@@ -192,7 +192,7 @@
     .speak-btn {
       padding: 0.2rem;
       position: absolute;
-      top: 20px;
+      top: 15px;
       right: 10px;
       text-decoration: none;
       color: var(--text-color);
@@ -241,6 +241,9 @@
     #share-btn:hover{
       background-color:var(--secondary-glow);
       border: 2px solid blue;
+    }
+    #toggle-lang-btn{
+      color: black;
     }
     /* Footer text styling */
     footer p {
@@ -349,6 +352,7 @@ PrimeQuotes</h1>
         <button id="copy-btn" class="btn"><i class="fas fa-copy"></i> Copy Text</button>
         <button id="generate-btn" class="btn">New Quote</button>
         <button id="share-btn" class="btn"><i class="fas fa-share-alt"></i> Share</button>
+        <button id="toggle-lang-btn" class="btn"><i class="fas fa-language"></i> हिंदी में</button>
 
       </div>
       <!-- Hidden textarea for copy functionality -->
@@ -451,7 +455,12 @@ l.parentNode.insertBefore(s, l);
           setTimeout(() => {
             quoteTextElem.textContent = currentQuote.text;
             quoteAuthorElem.textContent = `- ${currentQuote.author}`;
-            quoteCard.classList.add('visible'); // Start fade-in animation
+            quoteCard.classList.add('visible');
+            isHindi = false;
+            originalQuoteText = "";
+            translatedHindiText = "";
+            toggleLangBtn.innerHTML = '<i class="fas fa-language"></i> हिंदी में';
+            speak_quote.style.display = "unset"; // Start fade-in animation
           }, 400); // Timeout matches the CSS transition duration
         } catch (error) {
           console.error("Failed to fetch quote:", error);
@@ -559,7 +568,61 @@ l.parentNode.insertBefore(s, l);
     showMessageBox("Share Unavailable", "Sharing is not supported on this device. The quote has been copied instead.");
   }
 });
+let isHindi = false;
+let originalQuoteText = "";
+let translatedHindiText = "";
 
+const toggleLangBtn = document.getElementById('toggle-lang-btn');
+
+toggleLangBtn.addEventListener('click', async () => {
+  if (!currentQuote) {
+    showMessageBox("No Quote", "Please generate a quote first.");
+    return;
+  }
+
+  // If currently in Hindi, revert to English
+  if (isHindi) {
+    quoteTextElem.textContent = originalQuoteText;
+    quoteAuthorElem.textContent = `- ${currentQuote.author}`;
+    toggleLangBtn.innerHTML = '<i class="fas fa-language"></i> हिंदी में';
+    speak_quote.style.display="unset";
+    isHindi = false;
+    return;
+  }
+
+  // If Hindi version is already fetched, just display it
+  if (translatedHindiText) {
+    quoteTextElem.textContent = translatedHindiText;
+    quoteAuthorElem.textContent = `- ${currentQuote.author} (अनुवादित)`;
+    toggleLangBtn.innerHTML = '<i class="fas fa-language"></i> English';
+    speak_quote.style.display="none";
+    isHindi = true;
+    return;
+  }
+
+  // Otherwise, fetch translation
+  try {
+    toggleLangBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Translating...';
+
+    const apiUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t&q=${encodeURIComponent(currentQuote.text)}`;
+    const response = await fetch(apiUrl);
+    const result = await response.json();
+    translatedHindiText = result[0][0][0];
+
+    // Store original before switching
+    originalQuoteText = quoteTextElem.textContent;
+
+    quoteTextElem.textContent = translatedHindiText;
+    quoteAuthorElem.textContent = `- ${currentQuote.author} (अनुवादित)`;
+    toggleLangBtn.innerHTML = '<i class="fas fa-language"></i> English';
+    speak_quote.style.display="none";
+    isHindi = true;
+  } catch (error) {
+    console.error("Translation failed:", error);
+    toggleLangBtn.innerHTML = '<i class="fas fa-language"></i> हिंदी में';
+    showMessageBox("Translation Error", "Could not translate the quote. Please try again.");
+  }
+});
       // Close message box button click
       messageBoxCloseBtn.addEventListener('click', hideMessageBox);
 
