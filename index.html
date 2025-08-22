@@ -604,21 +604,39 @@ toggleLangBtn.addEventListener('click', async () => {
     isHindi = true;
     return;
   }
+  async function translateWithLibre(text, targetLang = "hi") {
+  try {
+    const response = await fetch("https://libretranslate.de/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        q: text,
+        source: "en",
+        target: targetLang,
+        format: "text"
+      })
+    });
+
+    const data = await response.json();
+    return data.translatedText;
+  } catch (err) {
+    console.error("LibreTranslate Error:", err);
+    throw err;
+  }
+}
 
   // Otherwise, fetch translation
   try {
     toggleLangBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Translating...';
 
-    const apiUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t&q=${encodeURIComponent(currentQuote.text)}`;
-    const response = await fetch(apiUrl);
-    const result = await response.json();
-    translatedHindiText = result[0][0][0];
+    
+    translatedHindiText = await translateWithLibre(currentQuote.text, "hi");
 
     // Store original before switching
     originalQuoteText = quoteTextElem.textContent;
 
     quoteTextElem.textContent = translatedHindiText;
-    quoteAuthorElem.textContent = `- ${currentQuote.author} (अनुवादित)`;
+    quoteAuthorElem.textContent = `- ${currentQuote.author}`;
     toggleLangBtn.innerHTML = '<i class="fas fa-language"></i> English';
     speak_quote.style.display="none";
     isHindi = true;
@@ -637,4 +655,5 @@ toggleLangBtn.addEventListener('click', async () => {
   </script>
 </body>
 </html>
+
 
